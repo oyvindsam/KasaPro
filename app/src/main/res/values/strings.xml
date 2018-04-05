@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">KasaPro</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="no_device_found">No devices found. Click fab to add new!</string>
+
+    <string name="not_implemented">Not implemented!</string>
+</resources>
