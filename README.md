@@ -18,7 +18,18 @@ Possible further features: widget, support for multiple devices, ON/OFF-timer
 
 UUID, EMAIL, PASSWORD must be changed.
 
-Kasa token is in the "token" json field in the payload. 
+Kasa token is in the "token" json field in the payload:
+<code>
+  {
+	"error_code": 0,
+	"result": {
+		"accountId": "170****",
+		"regTime": "2017-08-28 18:13:55",
+		"email": "EMAIL",
+		"token": "TOKEN"
+	}
+}
+ </code>
 
 ##  How to get device id:
 Send a HTTP POST to https://eu-wap.tplinkcloud.com/?token=TOKEN (content-type application/json)
