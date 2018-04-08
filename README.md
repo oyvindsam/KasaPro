@@ -56,15 +56,15 @@ Send a HTTP POST to https://eu-wap.tplinkcloud.com/?token=TOKEN (content-type ap
 		"status": 1,
 		"alias": "Livets Lys",
 		"deviceType": "IOT.SMARTBULB",
-		"appServerUrl": "https:\/\/eu-wap.tplinkcloud.com",
+		"appServerUrl": "https://eu-wap.tplinkcloud.com",
 		"deviceModel": "LB100(EU)",
-		"deviceMac": "50C7BF8*****",
+		"deviceMac": "50C7********",
 		"role": 0,
 		"isSameRegion": true,
-		"hwId": "111E35908497A05512E259BB768*****",
+		"hwId": "111E359******************************",
 		"fwId": "00000000000000000000000000000000",
-		"oemId": "ED2934C05EFE972CFE7D10E4D4C*****",
-		"deviceId": "8012D5ADBED98D41C6D7AFE5CDBA5909188*****",
+		"oemId": "ED2934C******************************",
+		"deviceId": "8012D5ADBED98D4*************************",
 		"deviceHwVer": "1.0"
 	      }
 	    ]
