@@ -1,19 +1,20 @@
-package com.samudev.kasapro
+package com.samudev.kasapro.control
 
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import com.samudev.kasapro.util.Util
-import com.samudev.kasapro.util.WebUtil
-
+import com.samudev.kasapro.R
 import kotlinx.android.synthetic.main.activity_control.*
-import java.util.*
 
-class ControlActivity : AppCompatActivity() {
+
+/* 'Control' is the main part of the app (ui), where you would connect to a new device
+    and control brightness and on/off state.
+*/
+class ControlActivity : AppCompatActivity(), ControlContract.View {
+
+    override lateinit var presenter : ControlContract.Presenter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,22 +26,22 @@ class ControlActivity : AppCompatActivity() {
                     .setAction("Action", null).show()
         }
 
-        AskForToken().execute("email", "password")  // not to be pushed to github..
+        //Create the presenter
+        presenter = ControlPresenter(this)
+        //presenter.getToken("mail", "password")
+
     }
 
-    // Example how to make http call off ui thread
-    class AskForToken(): AsyncTask<String, Void, String>() {
+    override fun showNotImplementedError() {
+        return
+    }
 
-        override fun doInBackground(vararg params: String?): String {
-            val email = params[0] ?: return ""
-            val password = params[1] ?: return ""
-            return WebUtil.getToken(Util.getNewUuid(), email, password)
-        }
+    override fun setLoadingIndicator(active: Boolean) {
+        return
+    }
 
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-            Log.v(ControlActivity::class.java.simpleName, result)
-        }
+    override fun showBrightnessLevel(on: Boolean, brightnessLevel: Int) {
+        return
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
