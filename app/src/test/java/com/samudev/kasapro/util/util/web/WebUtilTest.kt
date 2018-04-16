@@ -1,7 +1,5 @@
-package com.samudev.kasapro.util.util
+package com.samudev.kasapro.util.util.web
 
-import com.samudev.kasapro.util.Util
-import com.samudev.kasapro.util.WebUtil
 import org.junit.Test
 
 
