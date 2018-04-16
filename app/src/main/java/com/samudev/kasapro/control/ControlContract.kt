@@ -8,18 +8,17 @@ interface ControlContract {
 
     interface View : BaseView<Presenter> {
 
-        fun showNotImplementedError()
+        fun showNotImplementedError(toastMessage: String)
         fun setLoadingIndicator(active: Boolean)
         fun showBrightnessLevel(on: Boolean, brightnessLevel: Int)
     }
 
     interface Presenter : BasePresenter {
 
-        fun getToken(email: String?, password: String?): Boolean
-        fun getDeviceId(token: String?): Boolean
-        fun adjustLight(lightOn: Boolean?, brightnessLevel: Int?, token: String?, deviceId: String?): Boolean
-        fun saveToken(token: String?)
-        fun saveDeviceId(deviceId: String?)
+        // Change to setupDevice() ?
+        fun getNewDevice(email: String?, password: String?): Boolean  // called after user presses 'log in'
+        fun adjustLight(lightOn: Boolean?, brightnessLevel: Int?, token: String?, deviceId: String?): Int
     }
+
 
 }

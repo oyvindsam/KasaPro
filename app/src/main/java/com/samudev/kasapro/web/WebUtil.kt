@@ -1,6 +1,6 @@
-package com.samudev.kasapro.util
+package com.samudev.kasapro.web
 
-import android.util.Log
+import com.samudev.kasapro.control.ControlPresenter
 import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
@@ -9,11 +9,13 @@ import java.util.*
 
 class WebUtil {
 
+    class KasaServerException(errorMessage: String): Exception()  // Something went wrong with server call
+
     companion object {
         private val MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8")
         private const val TPLINK_BASIC_ADDRESS = "https://eu-wap.tplinkcloud.com"
 
-        fun getToken(uuid: UUID, email: String, password: String): String {
+        fun getToken(uuid: UUID, email: String, password: String): String? {
             val bodyJson = JSONObject()
             val innerBody = JSONObject()
             bodyJson.put("method", "login")
@@ -34,7 +36,7 @@ class WebUtil {
                 response = OkHttpClient().newCall(request).execute()
             } catch (e: IOException) {
                 e.printStackTrace()
-                return ""
+                throw KasaServerException("Failed to execute http request")
             }
 
             val body = response.body()  // body is never null on a non null response. https://github.com/square/okhttp/issues/2883
@@ -43,11 +45,12 @@ class WebUtil {
                 token = JSONObject(body!!.string()).getJSONObject("result").getString("token")
             } catch (e: Exception) {
                 e.printStackTrace()
+                throw KasaServerException("Failed to parse json payload")
             }
             return token
         }
 
-        fun getDeviceId(token: String): String {
+        fun getDeviceId(token: String): String? {
             val jsonBody = JSONObject()
             jsonBody.put("method", "getDeviceList")
             val requestBody = RequestBody.create(MEDIA_TYPE_JSON, jsonBody.toString())
@@ -62,25 +65,25 @@ class WebUtil {
                 response = OkHttpClient().newCall(request).execute()
             } catch (e: IOException) {
                 e.printStackTrace()
-                return ""
+                throw KasaServerException("Failed to execute http request")
             }
 
-            val body = response.body()  // body is never null on a non null response. https://github.com/square/okhttp/issues/2883
             var deviceId = ""
             try {
-                deviceId = JSONObject(body!!.string())
+                deviceId = JSONObject(response.body()!!.string())  // body is never null on a non null response. https://github.com/square/okhttp/issues/2883
                         .getJSONObject("result")
                         .getJSONArray("deviceList")
                         .getJSONObject(0)
                         .getString("deviceId")
             } catch (e: Exception) {
                 e.printStackTrace()
+                throw KasaServerException("Failed to parse json payload")
             }
             return deviceId
         }
 
         //TODO: should be possible to adjust brightness without light being on -> two return values?
-        fun adjustLight(lightOn: Boolean, brightnessLevel: Int, token: String, deviceId: String): Int? {
+        fun adjustLight(lightOn: Boolean, brightnessLevel: Int, token: String, deviceId: String): Int {
             var brightness = brightnessLevel
             if (brightnessLevel > 100) {
                 brightness = 100
@@ -116,7 +119,17 @@ class WebUtil {
                 e.printStackTrace()
                 return -1
             }
-            return 1  // TODO: check error code is 0 and parse returned brightness
+
+            var errorCode = -1
+
+            try {
+                errorCode = JSONObject(response.body()!!.string())
+                        .getInt("error_code")
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            return if (errorCode == 0) brightness else -1 // no error
         }
 
 

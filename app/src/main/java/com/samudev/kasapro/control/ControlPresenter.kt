@@ -3,8 +3,9 @@ package com.samudev.kasapro.control
 import android.os.AsyncTask
 import android.util.Log
 import com.samudev.kasapro.util.Util
-import com.samudev.kasapro.util.WebUtil
+import com.samudev.kasapro.web.WebUtil
 import java.util.*
+import kotlin.collections.HashMap
 
 
 class ControlPresenter(val controlView: ControlContract.View) : ControlContract.Presenter {
@@ -21,17 +22,18 @@ class ControlPresenter(val controlView: ControlContract.View) : ControlContract.
         // TODO: load token/device_id from savedPreferences
     }
 
-    override fun saveToken(token: String?) {
-        this.token = token ?: ""
-        Log.v(ControlPresenter::class.java.simpleName, "TOKEN: $token")
-        getDeviceId(token)
-        // TODO: actually save it
+    override fun getNewDevice(email: String?, password: String?): Boolean {
+        if (email == null || password == null || email.isEmpty()) return false
+        AddNewDeviceAsync().execute(this, email, password)
+        //TODO: show loading on ui
+        return true
     }
 
-    override fun saveDeviceId(deviceId: String?) {
-        this.deviceId = deviceId ?: ""
-        Log.v(ControlPresenter::class.java.simpleName, "DEVICE ID: $deviceId")
-        adjustLight(true, 50, token, deviceId)
+    fun saveNewDevice(deviceDetails: Map<String, String?>) {
+        this.token = deviceDetails.getValue("token") ?: return controlView.showNotImplementedError("Could not load device data..")
+        this.deviceId = deviceDetails.getValue("deviceId") ?: return controlView.showNotImplementedError("Could not load device data..")
+        Log.v(ControlPresenter::class.java.simpleName, "TOKEN: $token, DEVICEID: $deviceId")
+        controlView.showNotImplementedError("User info loaded: $token, $deviceId")
         // TODO: actually save it
     }
 
@@ -41,64 +43,43 @@ class ControlPresenter(val controlView: ControlContract.View) : ControlContract.
         Log.v(ControlPresenter::class.java.simpleName, "BRIGHTNESS LEVEL: $brightnessLevel")
     }
 
-    override fun getToken(email: String?, password: String?): Boolean {
-        if (email == null || password == null) return false
-        AskForTokenAsync().execute(this, email, password)
-        //TODO: show loading on ui
-        return true
-    }
-
-    override fun getDeviceId(token: String?): Boolean {
-        if (token == null) return false
-        AskForDeviceIdAsync().execute(this, token)
-        //TODO: show loading on ui
-        return true
-    }
-
-    override fun adjustLight(lightOn: Boolean?, brightnessLevel: Int?, token: String?, deviceId: String?): Boolean {
-        if (lightOn == null || brightnessLevel == null || token == null || deviceId == null) return false
+    override fun adjustLight(lightOn: Boolean?, brightnessLevel: Int?, token: String?, deviceId: String?): Int {
+        if (lightOn == null || brightnessLevel == null || token == null || deviceId == null) return -1
         AdjustLightStateAsync().execute(this, lightOn, brightnessLevel, token, deviceId)
         //TODO: show loading on ui
-        return true
+        return brightnessLevel
     }
-
 
 
     private fun onAsyncComplete() {
         //TODO: controlView.setLoadingIndicator(false)
     }
 
-
-    class AskForTokenAsync: AsyncTask<Any, Void, String>() {
+    class AddNewDeviceAsync: AsyncTask<Any, Void, Map<String, String?>?>() {
 
         private lateinit var presenter: ControlPresenter
 
-        override fun doInBackground(vararg params: Any?): String {
+        override fun doInBackground(vararg params: Any?): Map<String, String?>? {
             presenter = params[0] as ControlPresenter
             val email = params[1] as String
             val password = params[2] as String
-            return WebUtil.getToken(Util.getNewUuid(), email, password)
+
+            val resultMap = HashMap<String, String?>()
+            try {
+                val token = WebUtil.getToken(Util.getNewUuid(), email, password) ?: return null
+                val deviceId = WebUtil.getDeviceId(token) ?: return null
+                resultMap.put("token", token)
+                resultMap.put("deviceId", deviceId)
+            } catch (ignore: Exception) {
+                return null
+            }
+            return resultMap
         }
 
-        override fun onPostExecute(result: String?) {
+        override fun onPostExecute(result: Map<String, String?>?) {
             super.onPostExecute(result)
-            presenter.saveToken(result)
-        }
-    }
-
-    class AskForDeviceIdAsync: AsyncTask<Any, Void, String>() {
-
-        private lateinit var presenter: ControlPresenter
-
-        override fun doInBackground(vararg params: Any?): String {
-            presenter = params[0] as ControlPresenter
-            val token = params[1] as String
-            return WebUtil.getDeviceId(token)
-        }
-
-        override fun onPostExecute(result: String?) {
-            super.onPostExecute(result)
-            presenter.saveDeviceId(result)
+            if (result == null || result.isEmpty()) return //TODO: show error on ui
+            presenter.saveNewDevice(result)
         }
     }
 
@@ -106,7 +87,7 @@ class ControlPresenter(val controlView: ControlContract.View) : ControlContract.
 
         private lateinit var presenter: ControlPresenter
 
-        override fun doInBackground(vararg params: Any?): Int? {
+        override fun doInBackground(vararg params: Any?): Int {
             presenter = params[0] as ControlPresenter
             val lightOn = params[1] as Boolean
             val brightnessLevel = params[2] as Int
