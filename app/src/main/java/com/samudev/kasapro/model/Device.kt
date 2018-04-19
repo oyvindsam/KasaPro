@@ -1,7 +1,7 @@
-package com.samudev.kasapro.web
+package com.samudev.kasapro.model
 
 
-class LightState(var lightOn: Boolean, brightnessLevel: Int) {
+class Device(val id: String, val token: String, var lightOn: Boolean, brightnessLevel: Int) {
 
     var brightness = 0
         set(value) {

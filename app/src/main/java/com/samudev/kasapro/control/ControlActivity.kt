@@ -1,29 +1,25 @@
 package com.samudev.kasapro.control
 
 import android.app.AlertDialog
-import android.app.ProgressDialog.show
 import android.content.DialogInterface
 import android.os.Bundle
-import android.support.design.widget.Snackbar
-import android.support.v4.widget.SwipeRefreshLayout
 import android.support.v7.app.AppCompatActivity
-import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
 import android.widget.Toast
 import com.samudev.kasapro.R
-import com.samudev.kasapro.R.layout.activity_control
+import com.samudev.kasapro.model.Device
 import kotlinx.android.synthetic.main.activity_control.*
-import kotlinx.android.synthetic.main.signin_dialog.*
 
-
-/* 'Control' is the main part of the app (ui), where you would connect to a new device
-    and control brightness and on/off state.
-*/
+/**
+ * 'Control' is the main part of the app (ui), where you would connect to a new device
+and control brightness and on/off state.
+ */
 class ControlActivity : AppCompatActivity(), ControlContract.View {
 
     override lateinit var presenter : ControlContract.Presenter
+    lateinit var device: Device
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,8 +32,11 @@ class ControlActivity : AppCompatActivity(), ControlContract.View {
 
         //Create the presenter
         presenter = ControlPresenter(this)
-        //presenter.getToken("mail", "password")
 
+        device = presenter.getDevice(this) ?: Device("", "", false, 0)
+
+        if (device.id.isEmpty()) showToast("No device found, click fab to add new")
+        else showToast("Device ${device.id} loaded")
     }
 
     fun openAddDeviceDialog() {
@@ -55,11 +54,16 @@ class ControlActivity : AppCompatActivity(), ControlContract.View {
                 .show()
     }
 
+    override fun deviceUpdated(device: Device) {
+        presenter.saveDevice(this, device)
+        showToast("Device updated: ${device.id}, ${device.brightness}")
+    }
+
     fun addNewDevice(email: String, password: String) {
 
     }
 
-    override fun showNotImplementedError(toastMessage: String) {
+    override fun showToast(toastMessage: String) {
         Toast.makeText(applicationContext, toastMessage, Toast.LENGTH_SHORT).show()
     }
 

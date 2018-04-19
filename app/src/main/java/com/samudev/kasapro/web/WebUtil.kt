@@ -1,6 +1,7 @@
 package com.samudev.kasapro.web
 
-import com.samudev.kasapro.control.ControlPresenter
+import android.util.Log
+import com.samudev.kasapro.model.Device
 import okhttp3.*
 import org.json.JSONObject
 import java.io.IOException
@@ -82,31 +83,30 @@ class WebUtil {
             return deviceId
         }
 
+        /**
+         * Should adjust light state as specified in 'device', and return 'device' if successful
+         * or 'null' if failed to execute
+         */
         //TODO: should be possible to adjust brightness without light being on -> two return values?
-        fun adjustLight(lightOn: Boolean, brightnessLevel: Int, token: String, deviceId: String): Int {
-            var brightness = brightnessLevel
-            if (brightnessLevel > 100) {
-                brightness = 100
-            } else if (brightnessLevel < 0) {
-                brightness = 0
-            }
+        fun adjustLight(device: Device): Device? {
+
             val jsonBody = JSONObject()
             val jsonBodyParams = JSONObject()
             val jsonParamsRequestData = JSONObject()
             val jsonRequestDataLightningService = JSONObject()
             val jsonLightningState = JSONObject()
 
-            jsonLightningState.put("on_off", if (lightOn) 1 else 0)
-            jsonLightningState.put("brightness", brightness)
+            jsonLightningState.put("on_off", if (device.lightOn) 1 else 0)
+            jsonLightningState.put("brightness", device.brightness)
             jsonRequestDataLightningService.put("transition_light_state", jsonLightningState)
             jsonParamsRequestData.put("smartlife.iot.smartbulb.lightingservice", jsonRequestDataLightningService)
-            jsonBodyParams.put("deviceId", deviceId)
+            jsonBodyParams.put("deviceId", device.id)
             jsonBodyParams.put("requestData", jsonParamsRequestData.toString())  // API expects a json in string format
             jsonBody.put("method", "passthrough")
             jsonBody.put("params", jsonBodyParams)
 
             val requestBody = RequestBody.create(MEDIA_TYPE_JSON, jsonBody.toString())
-            val requestUrl = HttpUrl.parse(TPLINK_BASIC_ADDRESS)?.newBuilder()?.addQueryParameter("token", token)?.build() ?: return -1
+            val requestUrl = HttpUrl.parse(TPLINK_BASIC_ADDRESS)?.newBuilder()?.addQueryParameter("token", device.token)?.build() ?: return null
             val request = Request.Builder()
                     .url(requestUrl)
                     .post(requestBody)
@@ -117,7 +117,7 @@ class WebUtil {
                 response = OkHttpClient().newCall(request).execute()
             } catch (e: IOException) {
                 e.printStackTrace()
-                return -1
+                return null
             }
 
             var errorCode = -1
@@ -129,7 +129,7 @@ class WebUtil {
                 e.printStackTrace()
             }
 
-            return if (errorCode == 0) brightness else -1 // no error
+            return if (errorCode == 0) device else null // no error
         }
 
 
