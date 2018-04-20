@@ -52,11 +52,11 @@ class WebUtil {
             return token
         }
 
-        fun getDeviceId(token: String): String? {
+        fun getDeviceId(token: String): List<String>? {
             val jsonBody = JSONObject()
             jsonBody.put("method", "getDeviceList")
             val requestBody = RequestBody.create(MEDIA_TYPE_JSON, jsonBody.toString())
-            val requestUrl = HttpUrl.parse(TPLINK_BASIC_ADDRESS)?.newBuilder()?.addQueryParameter("token", token)?.build()  ?: return ""
+            val requestUrl = HttpUrl.parse(TPLINK_BASIC_ADDRESS)?.newBuilder()?.addQueryParameter("token", token)?.build()  ?: return null
             val request = Request.Builder()
                     .url(requestUrl)
                     .post(requestBody)
@@ -71,17 +71,19 @@ class WebUtil {
             }
 
             var deviceId = ""
+            var deviceName = ""
             try {
-                deviceId = JSONObject(response.body()!!.string())  // body is never null on a non null response. https://github.com/square/okhttp/issues/2883
+                val resultList = JSONObject(response.body()!!.string())  // body is never null on a non null response. https://github.com/square/okhttp/issues/2883
                         .getJSONObject("result")
                         .getJSONArray("deviceList")
                         .getJSONObject(0)
-                        .getString("deviceId")
+                deviceId = resultList.getString("deviceId")
+                deviceName = resultList.getString("alias")
             } catch (e: Exception) {
                 e.printStackTrace()
                 throw KasaServerException("Failed to parse json payload")
             }
-            return deviceId
+            return Arrays.asList(deviceId, deviceName)
         }
 
         /**
@@ -98,7 +100,7 @@ class WebUtil {
             val jsonLightningState = JSONObject()
 
             jsonLightningState.put("on_off", if (device.lightOn) 1 else 0)
-            jsonLightningState.put("brightness", device.brightness)
+            if (device.brightness > 0) jsonLightningState.put("brightness", device.brightness)  // negative brightness implies not to set it
             jsonRequestDataLightningService.put("transition_light_state", jsonLightningState)
             jsonParamsRequestData.put("smartlife.iot.smartbulb.lightingservice", jsonRequestDataLightningService)
             jsonBodyParams.put("deviceId", device.id)

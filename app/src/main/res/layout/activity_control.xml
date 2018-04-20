@@ -21,10 +21,6 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include
-        android:id="@+id/include"
-        layout="@layout/content_control" />
-
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_add_device"
         android:layout_width="wrap_content"
@@ -69,7 +65,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:layout_marginTop="28dp"
-        android:text="50%"
+        android:text="50"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
         android:translationZ="2dp"
         app:layout_constraintEnd_toEndOf="@+id/cw_device"
@@ -116,7 +112,6 @@
         app:layout_constraintTop_toTopOf="@+id/ib_50"
         app:layout_constraintVertical_bias="1.0"
         app:srcCompat="@drawable/ic_brightness_100" />
-
 
 
 </android.support.constraint.ConstraintLayout>

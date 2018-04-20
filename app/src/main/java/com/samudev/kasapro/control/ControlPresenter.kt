@@ -2,12 +2,10 @@ package com.samudev.kasapro.control
 
 import android.content.Context
 import android.os.AsyncTask
-import android.util.Log
 import com.samudev.kasapro.model.Device
 import com.samudev.kasapro.util.PreferencesUtil
 import com.samudev.kasapro.util.Util
 import com.samudev.kasapro.web.WebUtil
-import kotlin.collections.HashMap
 
 
 class ControlPresenter(val controlView: ControlContract.View) : ControlContract.Presenter {
@@ -37,18 +35,13 @@ class ControlPresenter(val controlView: ControlContract.View) : ControlContract.
 
     private fun deviceUpdated(device: Device?) {
         if (device == null) return controlView.showToast("Could not load device data..")
-        Log.v(ControlPresenter::class.java.simpleName, "TOKEN: $device.token, DEVICEID: $device.id")
-
-        controlView.showToast("User info loaded: $device.token, DEVICEID: $device.id")
         controlView.deviceUpdated(device)
     }
 
-    override fun adjustLight(device: Device): Int {
+    override fun adjustLight(device: Device) {
         AdjustLightStateAsync().execute(this, device)
         //TODO: show loading on ui
-        return device.brightness
     }
-
 
     private fun onAsyncComplete() {
         //TODO: controlView.setLoadingIndicator(false)
@@ -65,8 +58,10 @@ class ControlPresenter(val controlView: ControlContract.View) : ControlContract.
             val device : Device
             try {
                 val token = WebUtil.getToken(Util.getNewUuid(), email, password) ?: return null
-                val deviceId = WebUtil.getDeviceId(token) ?: return null
-                device = Device(deviceId, token, false, 0)
+                val deviceInfo = WebUtil.getDeviceId(token) ?: return null
+                val deviceId = deviceInfo.get(0)
+                val deviceName = deviceInfo.get(1)
+                device = Device(deviceId, token, deviceName, false, 0)
             } catch (ignore: Exception) {
                 return null
             }

@@ -23,7 +23,7 @@ interface ControlContract {
         fun getDevice(context: Context): Device? // get saved device or null
         fun saveDevice(context: Context, device: Device)
         fun getNewDevice(email: String?, password: String?): Boolean  // called after user presses 'log in'
-        fun adjustLight(device: Device): Int
+        fun adjustLight(device: Device)
     }
 
 
