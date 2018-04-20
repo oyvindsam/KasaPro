@@ -43,6 +43,7 @@ class WebUtil {
             val body = response.body()  // body is never null on a non null response. https://github.com/square/okhttp/issues/2883
             var token = ""
             try {
+                // TODO: extract alias also
                 token = JSONObject(body!!.string()).getJSONObject("result").getString("token")
             } catch (e: Exception) {
                 e.printStackTrace()
