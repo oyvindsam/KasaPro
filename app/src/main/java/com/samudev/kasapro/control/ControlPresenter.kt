@@ -10,44 +10,50 @@ import com.samudev.kasapro.web.WebUtil
 
 class ControlPresenter(val controlView: ControlContract.View) : ControlContract.Presenter {
 
+    private var device: Device?
+
     init {
         controlView.presenter = this
+
+        // TODO: when first connecting to a new device/getting saved one state might be wrong.
+        // Possible hack: pass adjustLight with negative brightness parameter and lightOn = true
+        device = PreferencesUtil.getKasaDevice(controlView.getContext())
+        controlView.updateDeviceDetails(device)  // device can be null -> no device in pref.
     }
 
     override fun start() {
     }
 
-    override fun getDevice(context: Context): Device? {
-        return PreferencesUtil.getKasaDevice(context)
+    override fun adjustLight(brightness: Int, lightOn: Boolean) {
+        if (device == null) return controlView.updateDeviceDetails(null)
+        device!!.brightness = brightness
+        device!!.lightOn = lightOn
+
+        controlView.setLoadingIndicator(true)
+        AdjustLightStateAsync().execute(this, device)
     }
 
-    override fun saveDevice(context: Context, device: Device) {
+    override fun getNewDevice(email: String?, password: String?) {
+        if (email == null || password == null || email.isEmpty()) return
+        AddNewDeviceAsync().execute(this, email, password)
+        controlView.setLoadingIndicator(true)
+    }
+
+    override fun updateDevice() {
+        if (device == null) return controlView.updateDeviceDetails(null)
+        AdjustLightStateAsync().execute(this, device)
+    }
+
+    private fun saveDevice(context: Context, device: Device) {
         PreferencesUtil.saveKasaDevice(context, device)
     }
 
-    override fun getNewDevice(email: String?, password: String?): Boolean {
-        if (email == null || password == null || email.isEmpty()) return false
-
-        AddNewDeviceAsync().execute(this, email, password)
-        //TODO: show loading on ui
-        return true
-    }
-
     private fun deviceUpdated(device: Device?) {
-        if (device == null) return controlView.showToast("Could not load device data..")
-        controlView.deviceUpdated(device)
+        controlView.updateDeviceDetails(device)
+        if (device != null) saveDevice(controlView.getContext(), device)
     }
 
-    override fun adjustLight(device: Device) {
-        AdjustLightStateAsync().execute(this, device)
-        //TODO: show loading on ui
-    }
-
-    private fun onAsyncComplete() {
-        //TODO: controlView.setLoadingIndicator(false)
-    }
-
-    class AddNewDeviceAsync: AsyncTask<Any, Void, Device?>() {
+    private class AddNewDeviceAsync: AsyncTask<Any, Void, Device?>() {
 
         private lateinit var presenter: ControlPresenter
 
@@ -74,7 +80,7 @@ class ControlPresenter(val controlView: ControlContract.View) : ControlContract.
         }
     }
 
-    class AdjustLightStateAsync: AsyncTask<Any, Void, Device?>() {
+    private class AdjustLightStateAsync: AsyncTask<Any, Void, Device?>() {
 
         private lateinit var presenter: ControlPresenter
 
@@ -87,7 +93,6 @@ class ControlPresenter(val controlView: ControlContract.View) : ControlContract.
 
         override fun onPostExecute(result: Device?) {
             super.onPostExecute(result)
-            if (result == null) return
             presenter.deviceUpdated(result)
         }
     }

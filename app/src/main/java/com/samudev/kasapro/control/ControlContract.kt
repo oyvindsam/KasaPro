@@ -12,18 +12,17 @@ interface ControlContract {
 
         fun showToast(toastMessage: String)
         fun setLoadingIndicator(active: Boolean)
-        fun showBrightnessLevel(on: Boolean, brightnessLevel: Int)
-        fun deviceUpdated(device: Device)
+        fun updateDeviceDetails(device: Device?)
+        fun getContext(): Context  // TODO: fix this hack with dagger
     }
 
     interface Presenter : BasePresenter {
 
         // TODO: use dependency injection (Dagger) to decouple this context parameter
         // https://stackoverflow.com/a/34664466 Presenter should not be aware of the context!
-        fun getDevice(context: Context): Device? // get saved device or null
-        fun saveDevice(context: Context, device: Device)
-        fun getNewDevice(email: String?, password: String?): Boolean  // called after user presses 'log in'
-        fun adjustLight(device: Device)
+        fun getNewDevice(email: String?, password: String?)
+        fun updateDevice()
+        fun adjustLight(brightness: Int, lightOn: Boolean)
     }
 
 
