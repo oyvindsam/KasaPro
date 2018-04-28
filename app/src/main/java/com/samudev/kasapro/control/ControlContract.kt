@@ -22,6 +22,8 @@ interface ControlContract {
         // https://stackoverflow.com/a/34664466 Presenter should not be aware of the context!
         fun getNewDevice(email: String?, password: String?)
         fun updateDevice()
+        fun saveDevice(context: Context, device: Device?)
+        fun loadDevice(context: Context) : Device?
         fun adjustLight(brightness: Int, lightOn: Boolean)
     }
 

@@ -22,7 +22,16 @@
             </intent-filter>
         </activity>
 
+        <service
+            android:name=".KasaProTileService"
+            android:icon="@drawable/ic_tile_brightness_100"
+            android:label="@string/tile_kasapro"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action
+                    android:name="android.service.quicksettings.action.QS_TILE"/>
+            </intent-filter>
+        </service>
+
     </application>
-
-
 </manifest>

@@ -5,4 +5,6 @@
     <string name="no_device_found">No devices found. Click fab to add new!</string>
 
     <string name="not_implemented">Not implemented!</string>
+
+    <string name="tile_kasapro">Light On</string>
 </resources>

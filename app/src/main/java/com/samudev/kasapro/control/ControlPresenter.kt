@@ -2,20 +2,21 @@ package com.samudev.kasapro.control
 
 import android.content.Context
 import android.os.AsyncTask
+import com.samudev.kasapro.AsyncTaskCaller
 import com.samudev.kasapro.model.Device
 import com.samudev.kasapro.util.PreferencesUtil
 import com.samudev.kasapro.util.Util
 import com.samudev.kasapro.web.WebUtil
 
 
-class ControlPresenter(val controlView: ControlContract.View) : ControlContract.Presenter {
+class ControlPresenter(private val controlView: ControlContract.View) : ControlContract.Presenter, AsyncTaskCaller {
 
     private var device: Device?
 
     init {
         controlView.presenter = this
 
-        // TODO: when first connecting to a new device/getting saved one state might be wrong.
+        // TODO: when first connecting to a new device/getting saved one state might be wrong (changed in another app etc.)
         // Possible hack: pass adjustLight with negative brightness parameter and lightOn = true
         device = PreferencesUtil.getKasaDevice(controlView.getContext())
         controlView.updateDeviceDetails(device)  // device can be null -> no device in pref.
@@ -26,8 +27,8 @@ class ControlPresenter(val controlView: ControlContract.View) : ControlContract.
 
     override fun adjustLight(brightness: Int, lightOn: Boolean) {
         if (device == null) return controlView.updateDeviceDetails(null)
-        device!!.brightness = brightness
-        device!!.lightOn = lightOn
+        device?.brightness = brightness
+        device?.lightOn = lightOn
 
         controlView.setLoadingIndicator(true)
         AdjustLightStateAsync().execute(this, device)
@@ -44,13 +45,23 @@ class ControlPresenter(val controlView: ControlContract.View) : ControlContract.
         AdjustLightStateAsync().execute(this, device)
     }
 
-    private fun saveDevice(context: Context, device: Device) {
-        PreferencesUtil.saveKasaDevice(context, device)
+    override fun saveDevice(context: Context, device: Device?) {
+        if (device != null) PreferencesUtil.saveKasaDevice(context, device)
+        else PreferencesUtil.saveKasaDevice(context, this.device)
+    }
+
+    override fun loadDevice(context: Context): Device? {
+        device = PreferencesUtil.getKasaDevice(context)
+        return device
     }
 
     private fun deviceUpdated(device: Device?) {
+        this.device = device
         controlView.updateDeviceDetails(device)
-        if (device != null) saveDevice(controlView.getContext(), device)
+    }
+
+    override fun asyncFinished(any: Any?) {
+        if (any != null) deviceUpdated(any as Device)
     }
 
     private class AddNewDeviceAsync: AsyncTask<Any, Void, Device?>() {
@@ -80,12 +91,12 @@ class ControlPresenter(val controlView: ControlContract.View) : ControlContract.
         }
     }
 
-    private class AdjustLightStateAsync: AsyncTask<Any, Void, Device?>() {
+    public class AdjustLightStateAsync: AsyncTask<Any, Void, Device?>() {
 
-        private lateinit var presenter: ControlPresenter
+        private lateinit var asyncTaskCaller: AsyncTaskCaller
 
         override fun doInBackground(vararg params: Any?): Device? {
-            presenter = params[0] as ControlPresenter
+            asyncTaskCaller = params[0] as AsyncTaskCaller
             val device = params[1] as Device
 
             return WebUtil.adjustLight(device)
@@ -93,7 +104,7 @@ class ControlPresenter(val controlView: ControlContract.View) : ControlContract.
 
         override fun onPostExecute(result: Device?) {
             super.onPostExecute(result)
-            presenter.deviceUpdated(result)
+            asyncTaskCaller.asyncFinished(result)
         }
     }
 }

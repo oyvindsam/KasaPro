@@ -16,4 +16,9 @@ class Device(val id: String, val token: String, val name: String, var lightOn: B
         brightness = brightnessLevel
     }
 
+    override fun toString(): String {
+        return "Device(id='$id', token='$token', name='$name', lightOn=$lightOn, brightness=$brightness)"
+    }
+
+
 }

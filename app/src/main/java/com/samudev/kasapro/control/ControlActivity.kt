@@ -105,6 +105,16 @@ class ControlActivity : AppCompatActivity(), ControlContract.View {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        updateDeviceDetails(presenter.loadDevice(this))  // Load device from disk and update ui
+    }
+
+    override fun onStop() {
+        super.onStop()
+        presenter.saveDevice(this, null)
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu_control, menu)
         return true

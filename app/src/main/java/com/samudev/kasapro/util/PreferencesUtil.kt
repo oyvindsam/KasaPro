@@ -42,7 +42,8 @@ class PreferencesUtil {
             return Device(deviceId, deviceToken, deviceName, deviceLightState, deviceBrightness)
         }
 
-        fun saveKasaDevice(context: Context, device: Device) {
+        fun saveKasaDevice(context: Context, device: Device?) {
+            if (device == null) return
             val editor = PreferenceManager.getDefaultSharedPreferences(context).edit()
             editor.putString(KASA_DEVICE_ID, device.id)
             editor.putString(KASA_DEVICE_TOKEN, device.token)
