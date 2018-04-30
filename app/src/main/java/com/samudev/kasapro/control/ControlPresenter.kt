@@ -103,6 +103,7 @@ class ControlPresenter(private val controlView: ControlContract.View) : ControlC
         override fun doInBackground(vararg params: Any?): Device? {
             asyncTaskCaller = params[0] as AsyncTaskCaller
             val device = params[1] as Device
+            WebUtil.adjustLight(device)
             return WebUtil.adjustLight(device)
         }
 
