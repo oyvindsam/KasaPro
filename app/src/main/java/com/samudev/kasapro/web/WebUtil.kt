@@ -73,10 +73,11 @@ class WebUtil {
             var deviceId = ""
             var deviceName = ""
             try {
-                val resultList = JSONObject(response.body()!!.string())  // body is never null on a non null response. https://github.com/square/okhttp/issues/2883
+                val resultList = JSONObject(response.body()?.string())  // body is never null on a non null response. https://github.com/square/okhttp/issues/2883
                         .getJSONObject("result")
                         .getJSONArray("deviceList")
                         .getJSONObject(0)
+                        ?: return null
                 deviceId = resultList.getString("deviceId")
                 deviceName = resultList.getString("alias")
             } catch (e: Exception) {
@@ -90,7 +91,6 @@ class WebUtil {
          * Should adjust light state as specified in 'device', and return 'device' if successful
          * or 'null' if failed to execute
          */
-        //TODO: should be possible to adjust brightness without light being on -> two return values?
         fun adjustLight(device: Device): Device? {
 
             val jsonBody = JSONObject()
@@ -126,13 +126,13 @@ class WebUtil {
             var errorCode = -1
 
             try {
-                errorCode = JSONObject(response.body()!!.string())
+                errorCode = JSONObject(response.body()?.string())
                         .getInt("error_code")
             } catch (e: Exception) {
                 e.printStackTrace()
             }
 
-            return if (errorCode == 0) device else null // no error
+            return if (errorCode == 0) device else null // 0: no error
         }
 
 

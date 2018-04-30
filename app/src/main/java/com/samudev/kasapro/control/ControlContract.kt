@@ -10,9 +10,9 @@ interface ControlContract {
 
     interface View : BaseView<Presenter> {
 
-        fun showToast(toastMessage: String)
+        fun showToast(toastMessage: String)  // Display a Toast with some info
         fun setLoadingIndicator(active: Boolean)
-        fun updateDeviceDetails(device: Device?)
+        fun updateDeviceDetails(device: Device?)  // update ui with new device info/no device found
         fun getContext(): Context  // TODO: fix this hack with dagger
     }
 
@@ -21,9 +21,9 @@ interface ControlContract {
         // TODO: use dependency injection (Dagger) to decouple this context parameter
         // https://stackoverflow.com/a/34664466 Presenter should not be aware of the context!
         fun getNewDevice(email: String?, password: String?)
-        fun updateDevice()
-        fun saveDevice(context: Context, device: Device?)
-        fun loadDevice(context: Context) : Device?
+        fun refreshDeviceState()  // Query REST api for device state
+        fun saveDeviceToDisk(context: Context, device: Device?)  // Save current device state to disk (pref)
+        fun loadDeviceFromDisk(context: Context) : Device?  // Load device from disk (pref)
         fun adjustLight(brightness: Int, lightOn: Boolean)
     }
 

@@ -1,7 +1,9 @@
 package com.samudev.kasapro.control
 
 import android.content.Context
+import android.icu.lang.UCharacter.GraphemeClusterBreak.L
 import android.os.AsyncTask
+import android.util.Log
 import com.samudev.kasapro.AsyncTaskCaller
 import com.samudev.kasapro.model.Device
 import com.samudev.kasapro.util.PreferencesUtil
@@ -9,7 +11,12 @@ import com.samudev.kasapro.util.Util
 import com.samudev.kasapro.web.WebUtil
 
 
+/**
+ * Controls all ui elements and updates to those. Activates/deactivates views.
+ */
 class ControlPresenter(private val controlView: ControlContract.View) : ControlContract.Presenter, AsyncTaskCaller {
+
+    private val LOG_TAG = ControlPresenter::class.java.simpleName
 
     private var device: Device?
 
@@ -36,40 +43,38 @@ class ControlPresenter(private val controlView: ControlContract.View) : ControlC
 
     override fun getNewDevice(email: String?, password: String?) {
         if (email == null || password == null || email.isEmpty()) return
-        AddNewDeviceAsync().execute(this, email, password)
         controlView.setLoadingIndicator(true)
+        AddNewDeviceAsync().execute(this, email, password)
     }
 
-    override fun updateDevice() {
-        if (device == null) return controlView.updateDeviceDetails(null)
+    // TODO: only check current light state, do not change it..
+    // Get light info from server. presenter's device can be outdated
+    override fun refreshDeviceState() {
         AdjustLightStateAsync().execute(this, device)
     }
 
-    override fun saveDevice(context: Context, device: Device?) {
+    override fun saveDeviceToDisk(context: Context, device: Device?) {
         if (device != null) PreferencesUtil.saveKasaDevice(context, device)
         else PreferencesUtil.saveKasaDevice(context, this.device)
     }
 
-    override fun loadDevice(context: Context): Device? {
+    override fun loadDeviceFromDisk(context: Context): Device? {
         device = PreferencesUtil.getKasaDevice(context)
         return device
     }
 
-    private fun deviceUpdated(device: Device?) {
-        this.device = device
-        controlView.updateDeviceDetails(device)
-    }
-
     override fun asyncFinished(any: Any?) {
-        if (any != null) deviceUpdated(any as Device)
+        this.device = any as? Device
+        controlView.updateDeviceDetails(device)
+        saveDeviceToDisk(controlView.getContext(), device)
     }
 
     private class AddNewDeviceAsync: AsyncTask<Any, Void, Device?>() {
 
-        private lateinit var presenter: ControlPresenter
+        private lateinit var asyncTaskCaller: AsyncTaskCaller
 
         override fun doInBackground(vararg params: Any?): Device? {
-            presenter = params[0] as ControlPresenter
+            asyncTaskCaller = params[0] as AsyncTaskCaller
             val email = params[1] as String
             val password = params[2] as String
             val device : Device
@@ -87,7 +92,7 @@ class ControlPresenter(private val controlView: ControlContract.View) : ControlC
 
         override fun onPostExecute(device: Device?) {
             super.onPostExecute(device)
-            presenter.deviceUpdated(device)
+            asyncTaskCaller.asyncFinished(device)
         }
     }
 
@@ -98,7 +103,6 @@ class ControlPresenter(private val controlView: ControlContract.View) : ControlC
         override fun doInBackground(vararg params: Any?): Device? {
             asyncTaskCaller = params[0] as AsyncTaskCaller
             val device = params[1] as Device
-
             return WebUtil.adjustLight(device)
         }
 

@@ -12,9 +12,10 @@ class PreferencesUtil {
         private const val KASA_DEVICE_ID = "com.samudev.kasapro.device_id"
         private const val KASA_DEVICE_TOKEN = "com.samudev.kasapro.token"
         private const val KASA_DEVICE_NAME = "com.samudev.kasapro.name"
-        private const val KASA_DEVICE_BRIGHTNESS = "com.samudev.kasapro.brightness"
         private const val KASA_DEVICE_LIGHT_STATE = "com.samudev.kasapro.light_state"
+        private const val KASA_DEVICE_BRIGHTNESS = "com.samudev.kasapro.brightness"
 
+        // TODO: implement this in view/presenter
         fun getKasaEmail(context: Context): String {
             val preferences = PreferenceManager.getDefaultSharedPreferences(context)
             return preferences.getString(KASA_EMAIL, "")
@@ -35,8 +36,8 @@ class PreferencesUtil {
             val deviceId = preferences.getString(KASA_DEVICE_ID, null) ?: return null
             val deviceToken = preferences.getString(KASA_DEVICE_TOKEN, null) ?: return null
             val deviceName = preferences.getString(KASA_DEVICE_NAME, null) ?: return null
-            val deviceBrightness = preferences.getInt(KASA_DEVICE_BRIGHTNESS, 0)
             val deviceLightState = preferences.getBoolean(KASA_DEVICE_LIGHT_STATE, false)
+            val deviceBrightness = preferences.getInt(KASA_DEVICE_BRIGHTNESS, 0)
             if (deviceId.isEmpty() || deviceToken.isEmpty()) return null
 
             return Device(deviceId, deviceToken, deviceName, deviceLightState, deviceBrightness)
@@ -48,8 +49,8 @@ class PreferencesUtil {
             editor.putString(KASA_DEVICE_ID, device.id)
             editor.putString(KASA_DEVICE_TOKEN, device.token)
             editor.putString(KASA_DEVICE_NAME, device.name)
-            editor.putInt(KASA_DEVICE_BRIGHTNESS, device.brightness)
             editor.putBoolean(KASA_DEVICE_LIGHT_STATE, device.lightOn)
+            editor.putInt(KASA_DEVICE_BRIGHTNESS, device.brightness)
             editor.apply()
         }
     }

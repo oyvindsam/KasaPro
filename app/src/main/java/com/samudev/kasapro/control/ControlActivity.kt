@@ -4,9 +4,12 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import android.os.Bundle
+import android.support.constraint.ConstraintLayout
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
@@ -19,6 +22,8 @@ import kotlinx.android.synthetic.main.activity_control.*
 and control brightness and on/off state.
  */
 class ControlActivity : AppCompatActivity(), ControlContract.View {
+
+    private val LOG_TAG = ControlActivity::class.java.simpleName
 
     override lateinit var presenter : ControlContract.Presenter
 
@@ -39,7 +44,7 @@ class ControlActivity : AppCompatActivity(), ControlContract.View {
         }
 
         swipe_refresh.apply {
-            setOnRefreshListener { presenter.updateDevice() }
+            setOnRefreshListener { presenter.refreshDeviceState() }
         }
 
         sb_brightness.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
@@ -68,15 +73,18 @@ class ControlActivity : AppCompatActivity(), ControlContract.View {
 
     override fun updateDeviceDetails(device: Device?) {
         setLoadingIndicator(false)
+        Log.v(LOG_TAG, "DevCIE: $device")
         if (device == null) {
             tv_device_name.text = "No device found"
-            tv_device_brightness.text = "0"
+            tv_device_brightness.text = "-"
             sb_brightness.progress = 0
+            findViewById<ConstraintLayout>(R.id.content_feedback).visibility = View.VISIBLE
             showToast("Press fab to add new device")
         } else {
             tv_device_name.text = device.name
             tv_device_brightness.text = device.brightness.toString()
             sb_brightness.progress = device.brightness
+            findViewById<ConstraintLayout>(R.id.content_feedback).visibility = View.INVISIBLE
         }
     }
 
@@ -105,14 +113,22 @@ class ControlActivity : AppCompatActivity(), ControlContract.View {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        Log.v(LOG_TAG, "onPause---")
+        presenter.saveDeviceToDisk(this, null)  // use presenter's device
+    }
+
     override fun onResume() {
         super.onResume()
-        updateDeviceDetails(presenter.loadDevice(this))  // Load device from disk and update ui
+        Log.v(LOG_TAG, "onResume---")
+        updateDeviceDetails(presenter.loadDeviceFromDisk(this))  // Load device from disk and update ui
     }
 
     override fun onStop() {
         super.onStop()
-        presenter.saveDevice(this, null)
+        Log.v(LOG_TAG, "onStop---")
+        presenter.saveDeviceToDisk(this, null)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

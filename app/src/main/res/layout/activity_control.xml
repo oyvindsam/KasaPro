@@ -26,6 +26,12 @@
 
     </android.support.design.widget.AppBarLayout>
 
+        <include
+            android:id="@+id/content_feedback"
+            layout="@layout/content_control"
+            android:visibility="invisible">
+        </include>
+
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_add_device"
         android:layout_width="wrap_content"
@@ -90,18 +96,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/cw_device" />
 
-    <ImageButton
-        android:id="@+id/ib_50"
-        android:layout_width="112dp"
-        android:layout_height="112dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginStart="64dp"
-        android:layout_marginTop="116dp"
-        app:layout_constraintBottom_toBottomOf="@+id/include"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/cw_device"
-        app:layout_constraintVertical_bias="0.74"
-        app:srcCompat="@drawable/ic_brightness_50" />
+        <ImageButton
+            android:id="@+id/ib_50"
+            android:layout_width="112dp"
+            android:layout_height="112dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="64dp"
+            android:layout_marginTop="116dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/cw_device"
+            app:layout_constraintVertical_bias="0.538"
+            app:srcCompat="@drawable/ic_brightness_50" />
 
     <ImageButton
         android:id="@+id/ib_100"
