@@ -6,5 +6,6 @@
 
     <string name="not_implemented">Not implemented!</string>
 
-    <string name="tile_kasapro">Light On</string>
+    <string name="tile_kasapro_on">Light On</string>
+    <string name="tile_kasapro_off">Light Off</string>
 </resources>
