@@ -39,6 +39,10 @@ class KasaProTileService : TileService(), AsyncTaskCaller {
 
     private fun toggleTile(on: Boolean) {
         val tile = qsTile
+        // return if state is already correct
+        if (tile.state == Tile.STATE_ACTIVE && on ||
+                tile.state == Tile.STATE_INACTIVE && !on) return
+
         if (on) {
             tile.icon = Icon.createWithResource(this, R.drawable.ic_tile_brightness_100)
             tile.label = getString(R.string.tile_kasapro_on)
@@ -52,11 +56,7 @@ class KasaProTileService : TileService(), AsyncTaskCaller {
     }
 
     override fun asyncFinished(any: Any?) {
-        if (any is Device) {
-            // only toggle if in wrong state
-            if (qsTile.state == Tile.STATE_ACTIVE && !any.lightOn) toggleTile(false)
-            else if (qsTile.state == Tile.STATE_INACTIVE && any.lightOn) toggleTile(true)
-        }
+        if (any is Device) toggleTile(any.lightOn)
         else Toast.makeText(this, "Could not update light", Toast.LENGTH_SHORT).show()
     }
 }
