@@ -54,9 +54,11 @@ class ControlActivity : AppCompatActivity(), ControlContract.View {
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                swipe_refresh.isEnabled = false
             }
 
             override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                swipe_refresh.isEnabled = true
                 if (seekBar == null) return
                 presenter.adjustLight(seekBar.progress, seekBar.progress > 0)
             }
