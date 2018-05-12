@@ -36,11 +36,14 @@ class ControlActivity : AppCompatActivity(), ControlContract.View {
         presenter = ControlPresenter(this)
 
         ib_50.setOnClickListener {
-            // TODO: add on/off ability
             presenter.adjustLight(50, true)
         }
         ib_100.setOnClickListener {
             presenter.adjustLight(100, true)
+        }
+
+        ib_0.setOnClickListener {
+            presenter.adjustLight(0, false)
         }
 
         swipe_refresh.apply {
@@ -91,17 +94,17 @@ class ControlActivity : AppCompatActivity(), ControlContract.View {
     }
 
     private fun openAddDeviceDialog() {
-        val builder = AlertDialog.Builder(this);
-        val inputView = layoutInflater.inflate(R.layout.signin_dialog, null)
+        val builder = AlertDialog.Builder(this)
+        val inputView = layoutInflater.inflate(R.layout.signin_dialog, null)  // This null is okay https://www.bignerdranch.com/blog/understanding-androids-layoutinflater-inflate/
         val emailTextView = inputView.findViewById(R.id.tv_email) as TextView
         val passwordTextView = inputView.findViewById(R.id.tv_password) as TextView
         builder.setView(inputView)
                 .setTitle("Log in")
                 .setMessage("Enter your Kasa account details")
-                .setPositiveButton("Log in", DialogInterface.OnClickListener { dialogInterface, i ->
+                .setPositiveButton("Log in", { _, _ ->
                     presenter.getNewDevice(emailTextView.text.toString(), passwordTextView.text.toString())
                 })
-                .setNegativeButton("Cancel", DialogInterface.OnClickListener { dialogInterface, i -> })
+                .setNegativeButton("Cancel",  { _, _ -> })
                 .show()
     }
 
@@ -118,7 +121,6 @@ class ControlActivity : AppCompatActivity(), ControlContract.View {
     override fun onPause() {
         super.onPause()
         Log.v(LOG_TAG, "onPause---")
-        presenter.saveDeviceToDisk(this, null)  // use presenter's device
     }
 
     override fun onResume() {
@@ -130,7 +132,6 @@ class ControlActivity : AppCompatActivity(), ControlContract.View {
     override fun onStop() {
         super.onStop()
         Log.v(LOG_TAG, "onStop---")
-        presenter.saveDeviceToDisk(this, null)
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
