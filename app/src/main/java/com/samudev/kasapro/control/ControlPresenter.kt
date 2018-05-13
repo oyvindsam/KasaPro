@@ -1,7 +1,6 @@
 package com.samudev.kasapro.control
 
 import android.content.Context
-import android.icu.lang.UCharacter.GraphemeClusterBreak.L
 import android.os.AsyncTask
 import android.util.Log
 import com.samudev.kasapro.AsyncTaskCaller
@@ -23,9 +22,8 @@ class ControlPresenter(private val controlView: ControlContract.View) : ControlC
     init {
         controlView.presenter = this
 
-        // TODO: when first connecting to a new device/getting saved one state might be wrong (changed in another app etc.)
-        // Possible hack: pass adjustLight with negative brightness parameter and lightOn = true
         device = PreferencesUtil.getKasaDevice(controlView.getContext())
+        ControlPresenter.AdjustLightStateAsync().execute(this, device, false)
         controlView.updateDeviceDetails(device)  // device can be null -> no device in pref.
     }
 
@@ -47,10 +45,9 @@ class ControlPresenter(private val controlView: ControlContract.View) : ControlC
         AddNewDeviceAsync().execute(this, email, password)
     }
 
-    // TODO: only check current light state, do not change it..
     // Get light info from server. presenter's device can be outdated
     override fun refreshDeviceState() {
-        AdjustLightStateAsync().execute(this, device)
+        AdjustLightStateAsync().execute(this, device, false)
     }
 
     override fun saveDeviceToDisk(context: Context, device: Device?) {
@@ -103,8 +100,10 @@ class ControlPresenter(private val controlView: ControlContract.View) : ControlC
         override fun doInBackground(vararg params: Any?): Device? {
             asyncTaskCaller = params[0] as AsyncTaskCaller
             val device = params[1] as Device
-            WebUtil.adjustLight(device)
-            return WebUtil.adjustLight(device)
+            var updateDeviceState = true
+            if (params.size == 3) updateDeviceState = params[2] as Boolean
+            WebUtil.queryDevice(device, updateDeviceState)
+            return WebUtil.queryDevice(device, updateDeviceState)
         }
 
         override fun onPostExecute(result: Device?) {

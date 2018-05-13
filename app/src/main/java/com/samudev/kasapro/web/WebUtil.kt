@@ -88,10 +88,10 @@ class WebUtil {
         }
 
         /**
-         * Should adjust light state as specified in 'device', and return 'device' if successful
-         * or 'null' if failed to execute
+         * Should adjust state as specified in 'device' or get current device sate,
+         * returns 'device' if successful or 'null' if failed to execute
          */
-        fun adjustLight(device: Device): Device? {
+        fun queryDevice(device: Device, setNewState: Boolean = true): Device? {
 
             val jsonBody = JSONObject()
             val jsonBodyParams = JSONObject()
@@ -99,8 +99,11 @@ class WebUtil {
             val jsonRequestDataLightningService = JSONObject()
             val jsonLightningState = JSONObject()
 
-            jsonLightningState.put("on_off", if (device.lightOn) 1 else 0)
-            if (device.brightness > 0) jsonLightningState.put("brightness", device.brightness)  // negative brightness implies not to set it
+            //  empty lightningState to just get current light state from server
+            if (setNewState) {
+                jsonLightningState.put("on_off", if (device.lightOn) 1 else 0)
+                if (device.brightness > 0) jsonLightningState.put("brightness", device.brightness)  // negative brightness implies not to set it
+            }
             jsonRequestDataLightningService.put("transition_light_state", jsonLightningState)
             jsonParamsRequestData.put("smartlife.iot.smartbulb.lightingservice", jsonRequestDataLightningService)
             jsonBodyParams.put("deviceId", device.id)
@@ -124,12 +127,29 @@ class WebUtil {
             }
 
             var errorCode = -1
-
+            val responseString= response.body()?.string() ?: return null
             try {
-                errorCode = JSONObject(response.body()?.string())
-                        .getInt("error_code")
+                errorCode = JSONObject(responseString).getInt("error_code")
             } catch (e: Exception) {
                 e.printStackTrace()
+            }
+
+            if (!setNewState) {
+                try {
+                    // This is just chaos since the returned json contains json as string in responseData. See readme
+                    val returnedLightState = JSONObject(
+                            JSONObject(responseString)
+                                    .getJSONObject("result")
+                                    .getString("responseData")
+                    )
+                            .getJSONObject("smartlife.iot.smartbulb.lightingservice")
+                            .getJSONObject("transition_light_state")
+                    device.lightOn = returnedLightState.getInt("on_off") == 1
+                    device.brightness = returnedLightState.getJSONObject("dft_on_state").getInt("brightness")
+                    errorCode = returnedLightState.getInt("error_code")  // Not sure how this error code is different from the one above
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
 
             return if (errorCode == 0) device else null // 0: no error

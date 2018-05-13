@@ -28,13 +28,13 @@ class KasaProTileService : TileService(), AsyncTaskCaller {
     override fun onTileAdded() {
         super.onTileAdded()
         val device = PreferencesUtil.getKasaDevice(this) ?: return  // return if user has not added a device
-        toggleTile(device.lightOn)
+        ControlPresenter.AdjustLightStateAsync().execute(this, device, false)
     }
 
     override fun onStartListening() {
         super.onStartListening()
         val device = PreferencesUtil.getKasaDevice(this) ?: return
-        toggleTile(device.lightOn)
+        ControlPresenter.AdjustLightStateAsync().execute(this, device, false)
     }
 
     private fun toggleTile(on: Boolean) {
