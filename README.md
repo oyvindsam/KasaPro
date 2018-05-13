@@ -90,6 +90,12 @@ Set light: Send a HTTP POST to https://eu-wap.tplinkcloud.com/?token=TOKEN (cont
 	  }
 	}
 
+Where requestData is json string like so: 
+
+	"{\"smartlife.iot.smartbulb.lightingservice\":{\"transition_light_state\":{\"on_off\":1,\"brightness\":100} } } "
+
+To get Device state just pass in empty transition_light_state: {}
+
 TOKEN, DEVICE-ID must be changed accordingly. Light bulb states are selvf explanatory. "error_code" in payload should be 0 for successful change:
 
 	{
