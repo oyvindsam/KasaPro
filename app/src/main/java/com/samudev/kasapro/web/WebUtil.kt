@@ -144,10 +144,19 @@ class WebUtil {
                     )
                             .getJSONObject("smartlife.iot.smartbulb.lightingservice")
                             .getJSONObject("transition_light_state")
+
                     device.lightOn = returnedLightState.getInt("on_off") == 1
-                    device.brightness = returnedLightState.getJSONObject("dft_on_state").getInt("brightness")
-                    errorCode = returnedLightState.getInt("error_code")  // Not sure how this error code is different from the one above
-                } catch (e: Exception) {
+
+                    // Get this, payload is different if device is on/off!
+                    if (device.lightOn) {
+                        device.brightness = returnedLightState.getInt("on_off")
+                        errorCode = returnedLightState.getInt("err_code")  // Not sure how this err code is different from the one above
+                    } else {
+                        device.brightness = returnedLightState.getJSONObject("dft_on_state").getInt("brightness")
+                        errorCode = returnedLightState.getInt("err_code")
+                    }
+                }
+                catch (e: Exception) {
                     e.printStackTrace()
                 }
             }
