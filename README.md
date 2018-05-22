@@ -2,11 +2,23 @@
 Control you Kasa smart-bulb with ease
 
 Goals of this project:
-1. Connect to Kasa-lightbulb and save the token for later use.
-2. Easy control options for connected light (100%, 50%, OFF etc.)
-3. SystemUI tile for easy switching
+1. Connect to Kasa-lightbulb and save the token for later use. Done
+2. Easy control options for connected light (100%, 50%, OFF etc.) Done
+3. SystemUI tile for easy switching. Done
 
-Possible further features: widget, support for multiple devices, ON/OFF-timer
+Features for the distant furutre: 
+- Widget 
+- Support for multiple devices 
+- ON/OFF-timer
+- Dig deep and find my inner interaction designer
+
+Screenshots
+
+<img src="https://github.com/oyvindsam/KasaPro/blob/master/screenshots/Screenshot_20180522-204726.png" width="360"> <img src="https://github.com/oyvindsam/KasaPro/blob/master/screenshots/Screenshot_20180522-211819.png" width="360">
+ <img src="https://github.com/oyvindsam/KasaPro/blob/master/screenshots/Screenshot_20180522-211752.png" width="360">
+ 
+ (It's the *Light On* tile)
+
 
 ##  How to get token:
 
