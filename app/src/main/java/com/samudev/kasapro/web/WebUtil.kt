@@ -1,6 +1,5 @@
 package com.samudev.kasapro.web
 
-import android.util.Log
 import com.samudev.kasapro.model.Device
 import okhttp3.*
 import org.json.JSONObject

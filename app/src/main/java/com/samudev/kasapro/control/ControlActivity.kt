@@ -14,6 +14,7 @@ import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
 import com.samudev.kasapro.R
+import com.samudev.kasapro.R.id.*
 import com.samudev.kasapro.model.Device
 import kotlinx.android.synthetic.main.activity_control.*
 
@@ -78,7 +79,6 @@ class ControlActivity : AppCompatActivity(), ControlContract.View {
 
     override fun updateDeviceDetails(device: Device?) {
         setLoadingIndicator(false)
-        Log.v(LOG_TAG, "DevCIE: $device")
         if (device == null) {
             tv_device_name.text = "No device found"
             tv_device_brightness.text = "-"

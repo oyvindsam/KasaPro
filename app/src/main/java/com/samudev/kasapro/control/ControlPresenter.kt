@@ -2,7 +2,6 @@ package com.samudev.kasapro.control
 
 import android.content.Context
 import android.os.AsyncTask
-import android.util.Log
 import com.samudev.kasapro.AsyncTaskCaller
 import com.samudev.kasapro.model.Device
 import com.samudev.kasapro.util.PreferencesUtil
@@ -52,7 +51,7 @@ class ControlPresenter(private val controlView: ControlContract.View) : ControlC
 
     override fun saveDeviceToDisk(context: Context, device: Device?) {
         if (device != null) PreferencesUtil.saveKasaDevice(context, device)
-        else PreferencesUtil.saveKasaDevice(context, this.device)
+        else return
     }
 
     override fun loadDeviceFromDisk(context: Context): Device? {
@@ -99,6 +98,7 @@ class ControlPresenter(private val controlView: ControlContract.View) : ControlC
 
         override fun doInBackground(vararg params: Any?): Device? {
             asyncTaskCaller = params[0] as AsyncTaskCaller
+            if (params[1] == null) return null
             val device = params[1] as Device
             var updateDeviceState = true
             if (params.size == 3) updateDeviceState = params[2] as Boolean
